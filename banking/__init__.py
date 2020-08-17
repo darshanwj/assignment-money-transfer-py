@@ -1,7 +1,7 @@
 from flask import Flask
+from flask_marshmallow import Marshmallow
+
 app = Flask(__name__)
+ma = Marshmallow(app)
 
-
-@app.route('/')
-def home():
-    return 'here we go again!'
+from . import views  # noqa

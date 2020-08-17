@@ -28,4 +28,4 @@ def postAccount():
         return err.messages, 422
     repos.MemStorage.insertAccount(account)
     # @TODO handle uncaught exceptions
-    return json.jsonify(account)
+    return json.jsonify(account), 201

@@ -20,7 +20,7 @@ def post_account():
         account = models.account_schema.load(json_data)
     except exceptions.ValidationError as err:
         return err.messages, 422
-    repos.MemStorage.insertAccount(account)
+    repos.MemStorage.insert_account(account)
     # @TODO handle uncaught exceptions
     return json.jsonify(account), 201
 

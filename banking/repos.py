@@ -2,12 +2,12 @@ class MemStorage:
     Accounts = []
 
     @classmethod
-    def insertAccount(cls, account):
+    def insert_account(cls, account):
         cls.Accounts.append(account)
         pass
 
     @classmethod
-    def findAccountById(cls, id):
+    def find_account_by_id(cls, id):
         for account in cls.Accounts:
             if account['id'] == id:
                 return account

@@ -1,18 +1,11 @@
-from . import ma
-from flask_marshmallow import fields
+from . import ma, repos
+from flask_marshmallow import fields, exceptions
+from marshmallow import validates
 import uuid
 
 
-class Account:
-    def __init__(self, customer_id, currency, balance):
-        self.id = uuid.uuid1()
-        self.customer_id = customer_id
-        self.currency = currency
-        self.balance = balance
-
-
 class AccountSchema(ma.Schema):
-    id = fields.fields.UUID(dump_only=True, default=uuid.uuid1())
+    id = fields.fields.UUID(load_only=True, missing=uuid.uuid1)
     customer_id = fields.fields.Int(required=True)
     currency = fields.fields.Str(required=True)
     balance = fields.fields.Float(required=True)
@@ -20,3 +13,18 @@ class AccountSchema(ma.Schema):
 
 account_schema = AccountSchema()
 accounts_schema = AccountSchema(many=True)
+
+
+class TransferSchema(ma.Schema):
+    sender_id = fields.fields.UUID(required=True)
+    receiver_id = fields.fields.UUID(required=True)
+    currency = fields.fields.Str(required=True)
+    amount = fields.fields.Float(required=True)
+
+    @validates('sender_id')
+    def validate_sender(self, sender_id):
+        if not repos.MemStorage.findAccountById(sender_id):
+            raise exceptions.ValidationError('Sender account not found')
+
+
+transfer_schema = TransferSchema()

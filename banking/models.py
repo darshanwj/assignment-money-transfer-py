@@ -26,5 +26,10 @@ class TransferSchema(ma.Schema):
         if not repos.MemStorage.findAccountById(sender_id):
             raise exceptions.ValidationError('Sender account not found')
 
+    @validates('receiver_id')
+    def validate_receiver(self, receiver_id):
+        if not repos.MemStorage.findAccountById(receiver_id):
+            raise exceptions.ValidationError('Receiver account not found')
+
 
 transfer_schema = TransferSchema()

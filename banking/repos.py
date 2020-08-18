@@ -9,5 +9,5 @@ class MemStorage:
     @classmethod
     def findAccountById(cls, id):
         for account in cls.Accounts:
-            if account.id == id:
+            if account['id'] == id:
                 return account

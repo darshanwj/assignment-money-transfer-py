@@ -3,6 +3,11 @@ from flask import json, request
 from flask_marshmallow import exceptions
 
 
+@app.route('/')
+def home():
+    return {'message': 'here we are!'}
+
+
 # curl -H 'Content-Type: application/json' http://127.0.0.1:5000/accounts
 @app.route('/accounts')
 def get_accounts():
@@ -36,4 +41,4 @@ def post_transfer():
         transfer = models.transfer_schema.load(json_data)
     except exceptions.ValidationError as err:
         return err.messages, 422
-    return json.jsonify(transfer)
+    return json.jsonify(transfer), 201

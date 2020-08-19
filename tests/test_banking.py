@@ -11,38 +11,40 @@ def client():
     return app.test_client()
 
 
-def test_home(client):
-    rv = client.get('/')
-    assert b'{"message":"here we are!"}\n' in rv.data
-
-
 def test_end_to_end(client):
     # create sender account
+    sender_bal = 260
     rv = client.post('/accounts', json={
         'customer_id': '1',
         'currency': 'USD',
-        'balance': 260
+        'balance': sender_bal
     })
     json_data = rv.get_json()
     print(json_data)
+    assert rv.status_code == 201
     assert not json_data.get('id') is None
     sender_id = json_data.get('id')
 
     # create receiver account
+    receiver_bal = 840
     rv = client.post('/accounts', json={
         'customer_id': '1',
         'currency': 'USD',
-        'balance': 840
+        'balance': receiver_bal
     })
     json_data = rv.get_json()
     print(json_data)
+    assert rv.status_code == 201
     assert not json_data.get('id') is None
     receiver_id = json_data.get('id')
+
+    # TODO: test some invalid accounts
 
     # find both in list of accounts
     rv = client.get('/accounts')
     json_data = rv.get_json()
     print(json_data)
+    assert rv.status_code == 200
     assert len(json_data) == 2
     for account in json_data:
         assert account.get('customer_id') == 1
@@ -68,6 +70,7 @@ def test_end_to_end(client):
         assert rv.status_code == 422
 
     # test valid transfer
+    trn_amt = 100
     rv = client.post('/transfer', json={
         'sender_id': sender_id,
         'receiver_id': receiver_id,
@@ -76,3 +79,11 @@ def test_end_to_end(client):
     })
     print(rv.get_json())
     assert rv.status_code == 201
+
+    # confirm account balances
+    rv = client.get('/accounts')
+    json_data = rv.get_json()
+    print(json_data)
+    assert rv.status_code == 200
+    assert json_data[0].get('balance') == sender_bal - trn_amt
+    assert json_data[1].get('balance') == receiver_bal + trn_amt

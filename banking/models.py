@@ -40,6 +40,8 @@ class TransferSchema(ma.Schema):
         if sender['balance'] < data['amount']:
             raise exceptions.ValidationError(
                 'Insufficient balance to perform transfer', 'balance')
+        data['sender'] = sender
+        data['receiver'] = receiver
         return data
 
 

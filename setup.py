@@ -7,7 +7,11 @@ setup(
     install_requires=[
         'flask',
         'flask-marshmallow',
-        'pytest',
-        'coverage'
     ],
+    extras_require={
+        "test": [
+            "pytest",
+            "coverage",
+        ],
+    },
 )

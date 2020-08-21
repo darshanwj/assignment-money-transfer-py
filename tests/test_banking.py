@@ -38,7 +38,8 @@ def test_end_to_end(client):
     assert not json_data.get('id') is None
     receiver_id = json_data.get('id')
 
-    # TODO: test some invalid accounts
+    # test invalid create account
+    rv = client.post('/accounts')
 
     # find both in list of accounts
     rv = client.get('/accounts')
@@ -53,6 +54,7 @@ def test_end_to_end(client):
     assert json_data[1].get('id') == receiver_id
 
     # test invalid transfers
+    rv = client.post('/transfer')
     cases = [
         (1212, receiver_id, 'USD', 100),
         (sender_id, 2323, 'USD', 100),

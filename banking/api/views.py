@@ -1,16 +1,18 @@
-from . import app, models, repos
-from flask import json, request
+from .. import models, repos
+from flask import json, request, Blueprint
 from flask_marshmallow import exceptions
+
+bp = Blueprint('api', __name__, url_prefix='/api')
 
 
 # curl -H 'Content-Type: application/json' http://127.0.0.1:5000/accounts
-@app.route('/accounts')
+@bp.route('/accounts')
 def get_accounts():
     return models.accounts_schema.jsonify(repos.MemStorage.Accounts)
 
 
 # curl -X POST -d '{"customer_id":2,"currency":"USD","balance":500}' -H 'Content-Type: application/json' http://127.0.0.1:5000/accounts
-@app.route('/accounts', methods=['POST'])
+@bp.route('/accounts', methods=['POST'])
 def post_account():
     json_data = request.get_json()
     if not json_data:
@@ -26,7 +28,7 @@ def post_account():
 
 
 # curl -X POST -d '{"sender_id":2,"receiver_id":2,"currency":"USD","amount":500}' -H 'Content-Type: application/json' http://127.0.0.1:5000/transfer
-@app.route('/transfer', methods=['POST'])
+@bp.route('/transfer', methods=['POST'])
 def post_transfer():
     json_data = request.get_json()
     if not json_data:

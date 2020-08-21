@@ -1,9 +1,7 @@
-from . import repos
-from flask_marshmallow import Marshmallow, fields, exceptions
+from . import repos, ma
+from flask_marshmallow import fields, exceptions
 from marshmallow import validates, post_load
 import uuid
-
-ma = Marshmallow()
 
 
 class AccountSchema(ma.Schema):

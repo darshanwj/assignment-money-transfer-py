@@ -1,8 +1,7 @@
+from . import bp
 from .. import models, repos
-from flask import json, request, Blueprint
+from flask import json, request
 from flask_marshmallow import exceptions
-
-bp = Blueprint('api', __name__, url_prefix='/api')
 
 
 # curl -H 'Content-Type: application/json' http://127.0.0.1:5000/accounts

@@ -5,7 +5,7 @@ import uuid
 
 
 class AccountSchema(ma.Schema):
-    id = fields.fields.UUID(missing=uuid.uuid1)
+    id = fields.fields.Int(dump_only=True)
     customer_id = fields.fields.Int(required=True)
     currency = fields.fields.Str(required=True)
     balance = fields.fields.Float(required=True)
@@ -16,18 +16,18 @@ accounts_schema = AccountSchema(many=True)
 
 
 class TransferSchema(ma.Schema):
-    sender_id = fields.fields.UUID(required=True)
-    receiver_id = fields.fields.UUID(required=True)
+    sender_id = fields.fields.Int(required=True)
+    receiver_id = fields.fields.Int(required=True)
     currency = fields.fields.Str(required=True)
     amount = fields.fields.Float(required=True)
 
     @post_load(pass_many=True)
     def validate_transfer(self, data, **kwags):
-        sender = repos.MemStorage.find_account_by_id(data['sender_id'])
+        sender = repos.Accounts.find_account_by_id(data['sender_id'])
         if not sender:
             raise exceptions.ValidationError(
                 'Sender account not found', 'sender_id')
-        receiver = repos.MemStorage.find_account_by_id(data['receiver_id'])
+        receiver = repos.Accounts.find_account_by_id(data['receiver_id'])
         if not receiver:
             raise exceptions.ValidationError(
                 'Receiver account not found', 'receiver_id')

@@ -10,7 +10,7 @@ def get_db():
     if 'db' not in g:
         # @TODO: Move to config
         g.db = sqlite3.connect(os.path.join(
-            current_app.instance_path, 'banking.sqlite3')
+            current_app.instance_path, 'banking.sqlite3'), detect_types=sqlite3.PARSE_DECLTYPES
         )
         g.db.row_factory = sqlite3.Row
 

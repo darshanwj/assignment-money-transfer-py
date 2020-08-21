@@ -4,13 +4,13 @@ from flask import json, request
 from flask_marshmallow import exceptions
 
 
-# curl -H 'Content-Type: application/json' http://127.0.0.1:5000/accounts
+# curl -H 'Content-Type: application/json' http://127.0.0.1:5000/api/accounts
 @bp.route('/accounts')
 def get_accounts():
-    return models.accounts_schema.jsonify(repos.MemStorage.Accounts)
+    return models.accounts_schema.jsonify(repos.Accounts.find_accounts())
 
 
-# curl -X POST -d '{"customer_id":2,"currency":"USD","balance":500}' -H 'Content-Type: application/json' http://127.0.0.1:5000/accounts
+# curl -X POST -d '{"customer_id":2,"currency":"USD","balance":500}' -H 'Content-Type: application/json' http://127.0.0.1:5000/api/accounts
 @bp.route('/accounts', methods=['POST'])
 def post_account():
     json_data = request.get_json()
@@ -21,12 +21,12 @@ def post_account():
         account = models.account_schema.load(json_data)
     except exceptions.ValidationError as err:
         return err.messages, 422
-    repos.MemStorage.insert_account(account)
+    id = repos.Accounts.insert_account(account)
     # @TODO handle uncaught exceptions
-    return json.jsonify(account), 201
+    return models.account_schema.jsonify(repos.Accounts.find_account_by_id(id)), 201
 
 
-# curl -X POST -d '{"sender_id":2,"receiver_id":2,"currency":"USD","amount":500}' -H 'Content-Type: application/json' http://127.0.0.1:5000/transfer
+# curl -X POST -d '{"sender_id":2,"receiver_id":2,"currency":"USD","amount":500}' -H 'Content-Type: application/json' http://127.0.0.1:5000/api/api/transfer
 @bp.route('/transfer', methods=['POST'])
 def post_transfer():
     json_data = request.get_json()
@@ -38,6 +38,10 @@ def post_transfer():
     except exceptions.ValidationError as err:
         return err.messages, 422
     # just do it!
-    transfer['sender']['balance'] -= transfer['amount']
-    transfer['receiver']['balance'] += transfer['amount']
-    return json.jsonify(transfer['sender']), 201
+    sender_bal = transfer['sender']['balance']
+    sender_bal -= transfer['amount']
+    receiver_bal = transfer['receiver']['balance']
+    receiver_bal += transfer['amount']
+    repos.Accounts.update_balances(
+        transfer['sender_id'], sender_bal, transfer['receiver_id'], receiver_bal)
+    return models.account_schema.jsonify(transfer['sender']), 201

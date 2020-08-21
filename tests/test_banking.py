@@ -1,5 +1,6 @@
-from banking import create_app
+from banking import create_app, db
 import pytest
+import os
 
 
 # This client fixture will be called by each individual test.
@@ -8,11 +9,19 @@ import pytest
 def client():
     app = create_app()
     # disable error catching during request handling, so that you get better error reports when performing test requests
-    app.config['TESTING'] = True
+    app.config.update(
+        TESTING=True,
+        DATABASE=os.path.join(app.instance_path, 'banking-tests.sqlite3')
+    )
+
+    with app.app_context():
+        db.init_db()
+
     return app.test_client()
 
 
 def test_end_to_end(client):
+    print(client.application.config)
     # create sender account
     sender_bal = 260
     rv = client.post('/api/accounts', json={

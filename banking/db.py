@@ -8,10 +8,8 @@ import os
 def get_db():
 
     if 'db' not in g:
-        # @TODO: Move to config
-        g.db = sqlite3.connect(os.path.join(
-            current_app.instance_path, 'banking.sqlite3'), detect_types=sqlite3.PARSE_DECLTYPES
-        )
+        g.db = sqlite3.connect(
+            current_app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
         g.db.row_factory = sqlite3.Row
 
     return g.db
@@ -25,15 +23,17 @@ def close_db(e=None):
         db.close()
 
 
+def init_db():
+    db = get_db()
+    with current_app.open_resource('schema.sql') as f:
+        db.executescript(f.read().decode('utf8'))
+
+
 @click.command('init-db')
 @with_appcontext
 def init_db_cmd():
     """ Clear existing data and create new tables."""
-    db = get_db()
-
-    with current_app.open_resource('schema.sql') as f:
-        db.executescript(f.read().decode('utf8'))
-
+    init_db()
     click.echo('Initialized the database.')
 
 

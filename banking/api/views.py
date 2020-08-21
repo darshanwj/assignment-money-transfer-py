@@ -1,7 +1,7 @@
 from . import bp
 from .. import models, repos
 from flask import json, request
-from flask_marshmallow import exceptions
+from flask_marshmallow import exceptions, fields
 
 
 # curl -H 'Content-Type: application/json' http://127.0.0.1:5000/api/accounts
@@ -37,11 +37,13 @@ def post_transfer():
         transfer = models.transfer_schema.load(json_data)
     except exceptions.ValidationError as err:
         return err.messages, 422
+    # try to use Decimal type directly
+    f = fields.fields.Decimal(places=2)
     # just do it!
-    sender_bal = transfer['sender']['balance']
-    sender_bal -= transfer['amount']
-    receiver_bal = transfer['receiver']['balance']
-    receiver_bal += transfer['amount']
+    sender_bal = f.deserialize(
+        transfer['sender']['balance']) - transfer['amount']
+    receiver_bal = f.deserialize(
+        transfer['receiver']['balance']) + transfer['amount']
     repos.Accounts.update_balances(
         transfer['sender_id'], sender_bal, transfer['receiver_id'], receiver_bal)
-    return models.account_schema.jsonify(transfer['sender']), 201
+    return models.account_schema.jsonify(repos.Accounts.find_account_by_id(transfer['sender_id'])), 201

@@ -2,13 +2,15 @@ from . import repos, ma
 from flask_marshmallow import fields, exceptions
 from marshmallow import validates, post_load
 import uuid
+import decimal
 
 
 class AccountSchema(ma.Schema):
     id = fields.fields.Int(dump_only=True)
     customer_id = fields.fields.Int(required=True)
     currency = fields.fields.Str(required=True)
-    balance = fields.fields.Float(required=True)
+    balance = fields.fields.Decimal(
+        required=True, places=2, as_string=True, rounding=decimal.ROUND_DOWN)
 
 
 account_schema = AccountSchema()
@@ -19,7 +21,8 @@ class TransferSchema(ma.Schema):
     sender_id = fields.fields.Int(required=True)
     receiver_id = fields.fields.Int(required=True)
     currency = fields.fields.Str(required=True)
-    amount = fields.fields.Float(required=True)
+    amount = fields.fields.Decimal(
+        required=True, places=2, as_string=True, rounding=decimal.ROUND_DOWN)
 
     @post_load(pass_many=True)
     def validate_transfer(self, data, **kwags):

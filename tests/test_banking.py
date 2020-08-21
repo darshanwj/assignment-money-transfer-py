@@ -20,10 +20,46 @@ def client():
     return app.test_client()
 
 
+def test_create_account(client):
+    for tc in [
+        ('260.532', '260.53'),
+        (425.2, '425.20'),
+        ('73.4962', '73.49'),
+        ('167.2999', '167.29'),
+        ('872.001', '872.00'),
+        ('872.009', '872.00'),
+        (35.895, '35.89'),
+        ('24', '24.00'),
+        (62, '62.00'),
+    ]:
+        rv = client.post('/api/accounts', json={
+            'customer_id': '1',
+            'currency': 'USD',
+            'balance': tc[0]
+        })
+        json_data = rv.get_json()
+        print(json_data)
+        assert rv.status_code == 201
+        assert not json_data.get('id') is None
+        assert json_data['customer_id'] == 1
+        assert json_data['currency'] == 'USD'
+        assert json_data['balance'] == tc[1]
+
+    rv = client.post('/api/accounts', json={
+        'customer_id': '1',
+        'currency': 23,
+        'balance': 200
+    })
+    json_data = rv.get_json()
+    print(json_data)
+    assert rv.status_code == 422
+
+    assert client.post('/api/accounts').status_code == 400
+
+
 def test_end_to_end(client):
-    print(client.application.config)
     # create sender account
-    sender_bal = 260
+    sender_bal = '260.53'
     rv = client.post('/api/accounts', json={
         'customer_id': '1',
         'currency': 'USD',
@@ -36,7 +72,7 @@ def test_end_to_end(client):
     sender_id = json_data.get('id')
 
     # create receiver account
-    receiver_bal = 840
+    receiver_bal = '840'
     rv = client.post('/api/accounts', json={
         'customer_id': '1',
         'currency': 'USD',
@@ -47,9 +83,6 @@ def test_end_to_end(client):
     assert rv.status_code == 201
     assert not json_data.get('id') is None
     receiver_id = json_data.get('id')
-
-    # test invalid create account
-    rv = client.post('/api/accounts')
 
     # find both in list of accounts
     rv = client.get('/api/accounts')
@@ -63,39 +96,52 @@ def test_end_to_end(client):
     assert json_data[0].get('id') == sender_id
     assert json_data[1].get('id') == receiver_id
 
+    # another one diff currency
+    rv = client.post('/api/accounts', json={
+        'customer_id': '1',
+        'currency': 'LKR',
+        'balance': 39400
+    })
+    json_data = rv.get_json()
+    print(json_data)
+    assert rv.status_code == 201
+    assert not json_data.get('id') is None
+    lkr_acc = json_data.get('id')
+
     # test invalid transfers
     rv = client.post('/api/transfer')
-    cases = [
+    for tc in [
         (1212, receiver_id, 'USD', 100),
         (sender_id, 2323, 'USD', 100),
         (sender_id, receiver_id, 'AED', 100),
-        (sender_id, receiver_id, 'USD', 300)
-    ]
-    for case in cases:
+        (sender_id, receiver_id, 'USD', 300),
+        (sender_id, lkr_acc, 'USD', 35)
+    ]:
         rv = client.post('/api/transfer', json={
-            'sender_id': case[0],
-            'receiver_id': case[1],
-            'currency': case[2],
-            'amount': case[3]
+            'sender_id': tc[0],
+            'receiver_id': tc[1],
+            'currency': tc[2],
+            'amount': tc[3]
         })
         print(rv.get_json())
         assert rv.status_code == 422
 
     # test valid transfer
-    trn_amt = 100
     rv = client.post('/api/transfer', json={
         'sender_id': sender_id,
         'receiver_id': receiver_id,
         'currency': 'USD',
-        'amount': 100
+        'amount': '100.00'
     })
-    print(rv.get_json())
     assert rv.status_code == 201
+    json_data = rv.get_json()
+    print(json_data)
+    assert json_data.get('id') == sender_id
 
     # confirm account balances
     rv = client.get('/api/accounts')
     json_data = rv.get_json()
     print(json_data)
     assert rv.status_code == 200
-    assert json_data[0].get('balance') == sender_bal - trn_amt
-    assert json_data[1].get('balance') == receiver_bal + trn_amt
+    assert json_data[0].get('balance') == '160.53'
+    assert json_data[1].get('balance') == '940.00'

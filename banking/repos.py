@@ -8,7 +8,8 @@ class Accounts:
         db = get_db()
         db.execute(
             'INSERT INTO account (customer_id, currency, balance) VALUES (?, ?, ?)',
-            (account['customer_id'], account['currency'], account['balance'])
+            (account['customer_id'], account['currency'],
+             str(account['balance']))
         )
         db.commit()
         cur = db.execute('SELECT last_insert_rowid()')
@@ -32,7 +33,7 @@ class Accounts:
     def update_balances(cls, sender_id, sender_bal, receiver_id, receiver_bal):
         db = get_db()
         db.execute('UPDATE account SET balance = ? WHERE id = ?',
-                   (sender_bal, sender_id))
+                   (str(sender_bal), sender_id))
         db.execute('UPDATE account SET balance = ? WHERE id = ?',
-                   (receiver_bal, receiver_id))
+                   (str(receiver_bal), receiver_id))
         db.commit()

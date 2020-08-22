@@ -10,5 +10,5 @@ $ pip install -e .[test]
 ## Tests
 
 ```
-$ coverage run -m pytest -v && coverage report -m
+$ coverage run -m pytest -s -v && coverage report -m
 ```

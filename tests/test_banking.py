@@ -68,8 +68,8 @@ def test_end_to_end(client):
     json_data = rv.get_json()
     print(json_data)
     assert rv.status_code == 201
-    assert not json_data.get('id') is None
     sender_id = json_data.get('id')
+    assert not sender_id is None
 
     # create receiver account
     receiver_bal = '840'
@@ -81,8 +81,8 @@ def test_end_to_end(client):
     json_data = rv.get_json()
     print(json_data)
     assert rv.status_code == 201
-    assert not json_data.get('id') is None
     receiver_id = json_data.get('id')
+    assert not receiver_id is None
 
     # find both in list of accounts
     rv = client.get('/api/accounts')
@@ -105,8 +105,8 @@ def test_end_to_end(client):
     json_data = rv.get_json()
     print(json_data)
     assert rv.status_code == 201
-    assert not json_data.get('id') is None
     lkr_acc = json_data.get('id')
+    assert not lkr_acc is None
 
     # test invalid transfers
     rv = client.post('/api/transfer')
@@ -133,9 +133,9 @@ def test_end_to_end(client):
         'currency': 'USD',
         'amount': '100.00'
     })
-    assert rv.status_code == 201
     json_data = rv.get_json()
     print(json_data)
+    assert rv.status_code == 201
     assert json_data.get('id') == sender_id
 
     # confirm account balances

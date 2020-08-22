@@ -2,21 +2,13 @@ import os
 from flask import Flask
 from flask_marshmallow import Marshmallow
 
+app = Flask(__name__)
+app.config.from_mapping(
+    _DATABASE=os.path.join(app.instance_path, 'banking.sqlite3'),
+    _CURRENCIES=['USD', 'AED', 'GBP']
+)
+
 ma = Marshmallow()
+ma.init_app(app)
 
-
-def create_app():
-    app = Flask(__name__)
-    app.config.from_mapping(
-        DATABASE=os.path.join(app.instance_path, 'banking.sqlite3')
-    )
-
-    ma.init_app(app)
-
-    from . import db
-    db.init_app(app)
-
-    from .api.views import bp
-    app.register_blueprint(bp)
-
-    return app
+from . import views  # noqa

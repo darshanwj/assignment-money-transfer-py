@@ -1,14 +1,14 @@
-from . import repos, ma
+from . import repos, ma, app
 from flask_marshmallow import fields, exceptions
-from marshmallow import validates, post_load
-import uuid
+from marshmallow import validate, post_load
 import decimal
 
 
 class AccountSchema(ma.Schema):
     id = fields.fields.Int(dump_only=True)
     customer_id = fields.fields.Int(required=True)
-    currency = fields.fields.Str(required=True)
+    currency = fields.fields.Str(
+        required=True, validate=validate.OneOf(app.config['_CURRENCIES']))
     balance = fields.fields.Decimal(
         required=True, places=2, as_string=True, rounding=decimal.ROUND_DOWN)
 
@@ -20,7 +20,8 @@ accounts_schema = AccountSchema(many=True)
 class TransferSchema(ma.Schema):
     sender_id = fields.fields.Int(required=True)
     receiver_id = fields.fields.Int(required=True)
-    currency = fields.fields.Str(required=True)
+    currency = fields.fields.Str(
+        required=True, validate=validate.OneOf(app.config['_CURRENCIES']))
     amount = fields.fields.Decimal(
         required=True, places=2, as_string=True, rounding=decimal.ROUND_DOWN)
 

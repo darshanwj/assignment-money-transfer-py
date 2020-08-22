@@ -1,19 +1,19 @@
-from banking import create_app, db
+from banking import app, db
 import pytest
 import os
 
 
-# This client fixture will be called by each individual test.
-# It gives us a simple interface to the application, where we can trigger test requests to the application
 @pytest.fixture
 def client():
-    app = create_app()
-    # disable error catching during request handling, so that you get better error reports when performing test requests
+    """This client fixture will be called by each individual test. 
+    It gives us a simple interface to the application, where we can trigger test requests to the application 
+    """
     app.config.update(
+        # disable error catching during request handling, so that you get better error reports when performing test requests
         TESTING=True,
-        DATABASE=os.path.join(app.instance_path, 'banking-tests.sqlite3')
+        _DATABASE=os.path.join(app.instance_path, 'banking-tests.sqlite3')
     )
-
+    # Empty db before each test
     with app.app_context():
         db.init_db()
 
@@ -45,10 +45,11 @@ def test_create_account(client):
         assert json_data['currency'] == 'USD'
         assert json_data['balance'] == tc[1]
 
+    # unsupported currency
     rv = client.post('/api/accounts', json={
         'customer_id': '1',
         'currency': 23,
-        'balance': 200
+        'balance': 'LKR'
     })
     json_data = rv.get_json()
     print(json_data)
@@ -99,7 +100,7 @@ def test_end_to_end(client):
     # another one diff currency
     rv = client.post('/api/accounts', json={
         'customer_id': '1',
-        'currency': 'LKR',
+        'currency': 'GBP',
         'balance': 39400
     })
     json_data = rv.get_json()

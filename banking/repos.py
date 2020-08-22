@@ -1,7 +1,7 @@
 from .db import get_db
 
 
-class Accounts:
+class Accounts():
 
     @classmethod
     def insert_account(cls, account):

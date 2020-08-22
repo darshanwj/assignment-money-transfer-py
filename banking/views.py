@@ -1,17 +1,16 @@
-from . import bp
-from .. import models, repos
+from . import models, repos, app
 from flask import json, request
 from flask_marshmallow import exceptions, fields
 
 
 # curl -H 'Content-Type: application/json' http://127.0.0.1:5000/api/accounts
-@bp.route('/accounts')
+@app.route('/api/accounts')
 def get_accounts():
     return models.accounts_schema.jsonify(repos.Accounts.find_accounts())
 
 
 # curl -X POST -d '{"customer_id":2,"currency":"USD","balance":500}' -H 'Content-Type: application/json' http://127.0.0.1:5000/api/accounts
-@bp.route('/accounts', methods=['POST'])
+@app.route('/api/accounts', methods=['POST'])
 def post_account():
     json_data = request.get_json()
     if not json_data:
@@ -27,7 +26,7 @@ def post_account():
 
 
 # curl -X POST -d '{"sender_id":2,"receiver_id":2,"currency":"USD","amount":500}' -H 'Content-Type: application/json' http://127.0.0.1:5000/api/api/transfer
-@bp.route('/transfer', methods=['POST'])
+@app.route('/api/transfer', methods=['POST'])
 def post_transfer():
     json_data = request.get_json()
     if not json_data:
